@@ -68,7 +68,7 @@ void espnet_task(void * pvParameters ){
           }
         }
         else{
-          uint8_t packet[2] = {PACKET_REQ_JOIN, 0};
+          uint8_t packet[2] = {ESPNET_REQ_JOIN, 0};
           esp_now_send(broadcast_mac, packet, 2);
         }
         last_search = millis();
@@ -87,7 +87,7 @@ void espnet_task(void * pvParameters ){
         }
         // Send ping to peers that haven't responded for a while
         else if((millis() - peer_config.last_response > ESPNET_TIMEOUT_PING) && (espnet_config.mode == MODE_HOST)){
-          espnet_send(PACKET_REQ_PING, peer_config.id);
+          espnet_send(ESPNET_REQ_PING, peer_config.id);
         }
       }
     }
@@ -160,11 +160,11 @@ void espnow_recv_cb(const uint8_t *addr, const uint8_t *data, int len){
   //...
   switch (tag){
     //-------------------------------------------------------------------------
-    case PACKET_REQ_PING:
+    case ESPNET_REQ_PING:
     {
-      espnet_send(PACKET_RSP_PONG, from_id, {}, 0);
+      espnet_send(ESPNET_RSP_PONG, from_id, {}, 0);
     }break;
-    case PACKET_REQ_LEDTOGGLE:
+    case ESPNET_REQ_LEDTOGGLE:
     {
       if(len > 0){
         digitalWrite(LED_BUILTIN, !data[0]);
@@ -174,7 +174,7 @@ void espnow_recv_cb(const uint8_t *addr, const uint8_t *data, int len){
       }
     }break;
     //-------------------------------------------------------------------------
-    case PACKET_REQ_JOIN:
+    case ESPNET_REQ_JOIN:
     {
       if(espnet_config.mode == MODE_HOST){
         if(peer_list->length < MAX_PEERS){
@@ -191,17 +191,17 @@ void espnow_recv_cb(const uint8_t *addr, const uint8_t *data, int len){
           peer_config.last_response = millis();
           array_push(peer_list, &peer_config);
           //...
-          uint8_t packet[3] = {PACKET_RSP_JOIN_ACCEPT, espnet_config.id, peer_config.id};
+          uint8_t packet[3] = {ESPNET_RSP_JOIN_ACCEPT, espnet_config.id, peer_config.id};
           esp_now_send(addr, packet, 3);
         }
         else{
-          uint8_t packet[2] = {PACKET_RSP_JOIN_DENY, espnet_config.id};
+          uint8_t packet[2] = {ESPNET_RSP_JOIN_DENY, espnet_config.id};
           esp_now_send(addr, packet, 2);
         }
       }
     }break;
     //-------------------------------------------------------------------------
-    case PACKET_RSP_JOIN_ACCEPT:
+    case ESPNET_RSP_JOIN_ACCEPT:
     {
       espnet_config.id = data[0];
       espnet_config.mode = MODE_CLIENT;
@@ -219,19 +219,19 @@ void espnow_recv_cb(const uint8_t *addr, const uint8_t *data, int len){
       array_push(peer_list, &peer_config);
     }break;
     //-------------------------------------------------------------------------
-    case PACKET_RSP_JOIN_DENY:
+    case ESPNET_RSP_JOIN_DENY:
     {
       espnet_config.mode = MODE_NONE;
     }break;
     //-------------------------------------------------------------------------
-    case PACKET_REQ_POINTS:
+    case ESPNET_REQ_POINTS:
     {
       if(espnet_config.mode == MODE_CLIENT){
-        espnet_send(PACKET_RSP_POINTS, from_id, (uint8_t*)tracker_points_rect, sizeof(point_rect_t)*tracker_points_len);  
+        espnet_send(ESPNET_RSP_POINTS, from_id, (uint8_t*)tracker_points_rect, sizeof(point_rect_t)*tracker_points_len);  
       }
     }break;
     //-------------------------------------------------------------------------
-    case PACKET_RSP_POINTS:
+    case ESPNET_RSP_POINTS:
     {
       uint8_t *packet = (uint8_t*)malloc(2+len);
       packet[0] = CMD_RSP_POINTS;
@@ -242,14 +242,14 @@ void espnow_recv_cb(const uint8_t *addr, const uint8_t *data, int len){
       free(packet);
     }break;
     //-------------------------------------------------------------------------
-    case PACKET_REQ_FRAME_COUNT:
+    case ESPNET_REQ_FRAME_COUNT:
     {
       if(espnet_config.mode == MODE_CLIENT){
-        espnet_send(PACKET_RSP_FRAME_COUNT, from_id, (uint8_t*)&tracker_frame_count, 8);
+        espnet_send(ESPNET_RSP_FRAME_COUNT, from_id, (uint8_t*)&tracker_frame_count, 8);
       }
     }break;
     //-------------------------------------------------------------------------
-    case PACKET_RSP_FRAME_COUNT:
+    case ESPNET_RSP_FRAME_COUNT:
     {
       if(espnet_config.mode == MODE_HOST){
         uint8_t *packet = (uint8_t*)malloc(8);

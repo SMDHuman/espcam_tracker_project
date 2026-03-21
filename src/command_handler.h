@@ -1,3 +1,6 @@
+#ifndef COMMAND_HANDLER_H
+#define COMMAND_HANDLER_H
+//-----------------------------------------------------------------------------
 #include <Arduino.h>
 
 //-----------------------------------------------------------------------------
@@ -13,9 +16,6 @@ enum CMD_PACKET_TYPE_E{
     CMD_RSP_POINTS,
     CMD_REQ_FRAME_COUNT,
     CMD_RSP_FRAME_COUNT,
-    CMD_REQ_CONFIG,
-    CMD_RSP_CONFIG,
-    CMD_SET_CONFIG,
     CMD_REQ_PEERLIST,
     CMD_RSP_PEERLIST,
     CMD_REQ_PEERCOUNT,
@@ -29,3 +29,5 @@ void command_task();
 
 //-----------------------------------------------------------------------------
 void command_parse(uint8_t *msg_data, uint32_t len);
+
+#endif

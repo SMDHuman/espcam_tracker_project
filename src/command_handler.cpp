@@ -15,9 +15,11 @@ void command_task(){
 
 //-----------------------------------------------------------------------------
 void command_parse(uint8_t *msg_data, uint32_t len){
+  // Consume command from package
   CMD_PACKET_TYPE_E cmd = (CMD_PACKET_TYPE_E)msg_data[0];
   uint8_t *data = msg_data + 1; 
   len -= 1;
+  //...
   esp_err_t res;
   switch(cmd){
   //===================================
@@ -39,7 +41,7 @@ void command_parse(uint8_t *msg_data, uint32_t len){
         serial_end_slip();
         free(packet);
       }else{
-        espnet_send(PACKET_REQ_FRAME_COUNT, rq_from, {}, 0);
+        espnet_send(ESPNET_REQ_FRAME_COUNT, rq_from, {}, 0);
       }
     }break;
   //===================================
@@ -82,7 +84,7 @@ void command_parse(uint8_t *msg_data, uint32_t len){
         serial_end_slip();
         free(packet);
       }else{
-        espnet_send(PACKET_REQ_POINTS, rq_from, {}, 0);
+        espnet_send(ESPNET_REQ_POINTS, rq_from, {}, 0);
       }
     }break;
   //===================================

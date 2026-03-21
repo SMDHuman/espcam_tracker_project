@@ -14,22 +14,22 @@
 
 //-----------------------------------------------------------------------------
 enum ESPNET_PACKETS: uint8_t{
-    PACKET_REQ_PING = 0,
-    PACKET_RSP_PONG,
-    PACKET_REQ_LEDTOGGLE,
-    PACKET_REQ_POINTS,
-    PACKET_RSP_POINTS,
-    PACKET_REQ_FRAME_COUNT,
-    PACKET_RSP_FRAME_COUNT,
-    PACKET_REQ_ESPNET_CONFIG,
-    PACKET_RSP_ESPNET_CONFIG,
-    PACKET_SET_ESPNET_CONFIG,
-    PACKET_RSP_ERROR,
-    PACKET_REQ_JOIN,
-    PACKET_RSP_JOIN_ACCEPT,
-    PACKET_RSP_JOIN_DENY,
-    PACKET_REQ_LEAVE,
-    PACKET_RSP_LEAVE,
+    ESPNET_REQ_PING = 0,
+    ESPNET_RSP_PONG,
+    ESPNET_REQ_LEDTOGGLE,
+    ESPNET_REQ_POINTS,
+    ESPNET_RSP_POINTS,
+    ESPNET_REQ_FRAME_COUNT,
+    ESPNET_RSP_FRAME_COUNT,
+    ESPNET_REQ_ESPNET_CONFIG,
+    ESPNET_RSP_ESPNET_CONFIG,
+    ESPNET_SET_ESPNET_CONFIG,
+    ESPNET_RSP_ERROR,
+    ESPNET_REQ_JOIN,
+    ESPNET_RSP_JOIN_ACCEPT,
+    ESPNET_RSP_JOIN_DENY,
+    ESPNET_REQ_LEAVE,
+    ESPNET_RSP_LEAVE,
 };
 
 enum ESPNET_MODES: uint8_t{
@@ -52,7 +52,6 @@ extern array *peer_list;
 
 void espnet_init();
 void espnet_task(void * pvParameters );
-void espnet_load_configs();
 void espnet_send(ESPNET_PACKETS tag, uint8_t id);
 void espnet_send(ESPNET_PACKETS tag, uint8_t id, uint8_t *data, uint32_t len);
 uint8_t espnet_check_id(uint8_t id);
