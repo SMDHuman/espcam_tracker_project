@@ -15,7 +15,6 @@ static uint8_t rx_slip_buffer[2028];
 //-----------------------------------------------------------------------------
 // Initialize the serial communication with the specified baud rate
 void serial_init(){
-  Serial.begin(115200);
   slip_init(rx_slip_buffer, sizeof(rx_slip_buffer));
 }
 

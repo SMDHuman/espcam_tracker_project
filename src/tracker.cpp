@@ -26,14 +26,6 @@ uint8_t tracker_points_len = 0;
 point_rect_t tracker_points_rect[254];
 tracker_status_e tracker_status = WAIT;
 
-static uint32_t filter_min;
-static uint32_t erode;
-static uint32_t erode_mul;
-static uint32_t erode_div;
-static uint32_t dilate;
-static uint32_t flip_x;
-static uint32_t flip_y;
-
 //-----------------------------------------------------------------------------
 void tracker_init(){
 }
@@ -58,8 +50,8 @@ void tracker_push_camera_buffer(camera_fb_t *fb){
     for(int x = 0; x < TRACKER_WIDTH; x++){
       int fb_x = (fb->width * x) / TRACKER_WIDTH;
       int fb_y = (fb->height * y) / TRACKER_HEIGHT;
-      int f_x = flip_x ? (TRACKER_WIDTH-x-1) : x;
-      int f_y = flip_y ? (TRACKER_HEIGHT-y-1) : y;
+      int f_x = TRACKER_FLIP_X ? (TRACKER_WIDTH-x-1) : x;
+      int f_y = TRACKER_FLIP_Y ? (TRACKER_HEIGHT-y-1) : y;
       tracker_buffer_A[(f_y*TRACKER_WIDTH)+f_x] = fb->buf[(fb_y*fb->width)+fb_x];
     }
   }
@@ -70,7 +62,7 @@ static void filter_buffer(){
   //uint8_t buffer_B[TRACKER_BUF_LEN];
   uint8_t *buffer_B = (uint8_t *)malloc(TRACKER_BUF_LEN);
   for(size_t i = 0; i < TRACKER_BUF_LEN; i++){
-    if(tracker_buffer_A[i] < filter_min){
+    if(tracker_buffer_A[i] < TRACKER_FILTER_MIN){
       buffer_B[i] = 0x00;
     }else{
       buffer_B[i] = 0xFF;
@@ -86,21 +78,21 @@ static void erode_buffer(){
   uint8_t *buffer_B = (uint8_t *)malloc(TRACKER_BUF_LEN);
   memset(buffer_B, 0, TRACKER_BUF_LEN);
   //...
-  static const uint16_t area = (erode*2+1)*(erode*2+1); 
-  for(size_t y = 0; y < TRACKER_HEIGHT-(erode*2); y++){
-    for(size_t x = 0; x < TRACKER_WIDTH-(erode*2); x++){
+  static const uint16_t area = (TRACKER_ERODE*2+1)*(TRACKER_ERODE*2+1); 
+  for(size_t y = 0; y < TRACKER_HEIGHT-(TRACKER_ERODE*2); y++){
+    for(size_t x = 0; x < TRACKER_WIDTH-(TRACKER_ERODE*2); x++){
       //...
       uint16_t count = 0;
-      for(size_t dy = 0; dy < erode*2+1; dy++){
-        for(size_t dx = 0; dx < erode*2+1; dx++){
+      for(size_t dy = 0; dy < TRACKER_ERODE*2+1; dy++){
+        for(size_t dx = 0; dx < TRACKER_ERODE*2+1; dx++){
           if(tracker_buffer_A[((y+dy)*TRACKER_WIDTH)+(x+dx)] == 0xFF){
             count ++;
           }
       }}
-      if(area*erode_mul <= count*erode_div){
-        buffer_B[((y+erode)*TRACKER_WIDTH)+(x+erode)] = 0xFF;
+      if(area*TRACKER_ERODE_RATIO <= count*TRACKER_ERODE_RATIO_DIV){
+        buffer_B[((y+TRACKER_ERODE)*TRACKER_WIDTH)+(x+TRACKER_ERODE)] = 0xFF;
       }else{
-        buffer_B[((y+erode)*TRACKER_WIDTH)+(x+erode)] = 0x0;
+        buffer_B[((y+TRACKER_ERODE)*TRACKER_WIDTH)+(x+TRACKER_ERODE)] = 0x0;
       }
   }}
   //...
@@ -113,12 +105,12 @@ static void dilate_buffer(){
   uint8_t *buffer_B = (uint8_t *)malloc(TRACKER_BUF_LEN);
   memset(buffer_B, 0, TRACKER_BUF_LEN);
   //...
-  for(size_t y = 0; y < TRACKER_HEIGHT-(dilate*2); y++){
-    for(size_t x = 0; x < TRACKER_WIDTH-(dilate*2); x++){
+  for(size_t y = 0; y < TRACKER_HEIGHT-(TRACKER_DILATE*2); y++){
+    for(size_t x = 0; x < TRACKER_WIDTH-(TRACKER_DILATE*2); x++){
       //...
-      if(tracker_buffer_A[((y+dilate)*TRACKER_WIDTH)+(x+dilate)] == 0xFF){
-        for(size_t dy = 0; dy < dilate*2+1; dy++){
-          for(size_t dx = 0; dx < dilate*2+1; dx++){
+      if(tracker_buffer_A[((y+TRACKER_DILATE)*TRACKER_WIDTH)+(x+TRACKER_DILATE)] == 0xFF){
+        for(size_t dy = 0; dy < TRACKER_DILATE*2+1; dy++){
+          for(size_t dx = 0; dx < TRACKER_DILATE*2+1; dx++){
             buffer_B[((y+dy)*TRACKER_WIDTH)+(x+dx)] = 0xFF;
         }}
       }
@@ -149,15 +141,18 @@ static void flood_fill(size_t s_i, uint8_t value)
   uint8_t base_value = tracker_buffer_A[s_i];
   size_t check_len = (TRACKER_BUF_LEN>>2); // TRACKER_BUF_LEN / 4
   size_t *check = (size_t*)malloc(check_len*sizeof(size_t));
+  if(check == nullptr){
+    return;
+  }
   check[0] = s_i;
   uint16_t check_index = 1;
   while(check_index > 0){
-    if(check_index > check_len){
-      return;
+    if(check_index >= check_len){
+      break;
     }
     size_t i = check[--check_index];
     // Base cases 
-    if ((i < 0) | (i > TRACKER_BUF_LEN)) {
+    if (i >= TRACKER_BUF_LEN) {
       continue; 
     }
     if(tracker_buffer_A[i] != base_value){
@@ -195,7 +190,7 @@ static void locate_rect_buffer(){
   for(size_t y = 0; y < TRACKER_HEIGHT; y++){
     for(size_t x = 0; x < TRACKER_WIDTH; x++){
       size_t i = (y*TRACKER_WIDTH)+x;
-      if((tracker_buffer_A[i] > 0) & (tracker_buffer_A[i] < 255)){
+      if((tracker_buffer_A[i] > 0) && (tracker_buffer_A[i] < 255)){
         uint8_t ri = tracker_buffer_A[i]-1;
         point_rect_t *rect = &tracker_points_rect[ri];
         if(x < rect->x1){

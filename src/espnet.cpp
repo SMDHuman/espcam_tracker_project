@@ -40,6 +40,8 @@ void espnet_init(){
   peer_info.channel = 0;
   peer_info.encrypt = false;
   esp_now_add_peer(&peer_info);
+  //...
+  espnet_config.mode = MODE_SEARCHING;
 }
 
 //-----------------------------------------------------------------------------
@@ -48,6 +50,7 @@ void espnet_task(void * pvParameters ){
   static int32_t search_start = -1;
   while(1){
     // Searching for host
+    // Serial.printf("espnet_config.mode: %i\n", espnet_config.mode);
     if((espnet_config.mode == MODE_SEARCHING)){
       if(millis() - last_search > ESPNET_SEARCH_INTERVAL){
         if(search_start == -1){

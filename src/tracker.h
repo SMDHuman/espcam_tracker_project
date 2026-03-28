@@ -17,6 +17,8 @@
 #define TRACKER_ERODE_RATIO     4
 #define TRACKER_ERODE_RATIO_DIV 4
 #define TRACKER_DILATE          6
+#define TRACKER_FLIP_X          0
+#define TRACKER_FLIP_Y          0
 
 //-----------------------------------------------------------------------------
 struct point_rect_t{

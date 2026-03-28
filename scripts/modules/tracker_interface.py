@@ -18,7 +18,7 @@ class Tracker_Interface(Protocol):
 
   def __init__(self, port: str, baudrate: int = 115200, timeout: int = 1):
     # import the enums from the header file
-    path = os.path.join(sys.path[0], "..", "src", "command_handler.h")
+    path = os.path.join(sys.path[0], "..", "include", "command_handler.h")
     with open(path) as f:
       enums = enum_parser(f.read())
     self.__dict__.update(enums["CMD_PACKET_TYPE_E"])
@@ -35,7 +35,7 @@ class Tracker_Interface(Protocol):
   def data_received(self, data: bytes):
     for byte in data:
       self.slip.push(byte)
-      #print(byte)
+      # print(byte)
       #...
       if(self.slip.in_wait() > 0):
         packet = self.slip.get()
@@ -43,6 +43,7 @@ class Tracker_Interface(Protocol):
 
   # Sends data to the ESP32-CAM using SLIP protocol
   def _slip_send(self, data: int|bytes|bytearray|list[int], check_checksum: bool = True):
+    # print("Sent: ", data)
     if(isinstance(data, bytes) or isinstance(data, list) or isinstance(data, bytearray)):
       for byte in data:
         self._slip_send(byte)
@@ -110,7 +111,7 @@ class Tracker_Interface(Protocol):
     #...
     tag, data = self._pop_rx_buffer()
     #...
-    if(tag == self.CMD_RSP_FCOUNT):
+    if(tag == self.CMD_RSP_FRAME_COUNT):
       rsp_frm = data[0]
       if(rsp_frm != frm): return -1
       fcount = struct.unpack("Q", data[1:])[0]

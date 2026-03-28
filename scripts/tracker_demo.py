@@ -30,6 +30,7 @@ if(__name__ == "__main__"):
       peer_count = tracker.get_peer_count()
       print("peer count: ", peer_count)
       print("peer list: ", tracker.get_peer_list())
+      print("total frame: ", tracker.get_frame_count())
       #...
       ax.clear()
       ax.set_xlim(0, 240)
@@ -45,12 +46,12 @@ if(__name__ == "__main__"):
       last_fcount = fcount
       #...
       for i in range(peer_count+1):
-        #print(f" |-----------------")
-        #print(f" | peer #{i} ")
-        #print("  +-total frames: ", tracker.get_frame_count(i))
+        # print(f" |-----------------")
+        # print(f" | peer #{i} ")
+        # print("  +-total frames: ", tracker.get_frame_count(i))
         points = tracker.get_points(i)
-        #print("  +-points: ", points)
-        #print(f"id{i} trk_erode:", tracker.get_config("trk_erode", i))
+        # print("  +-points: ", points)
+        # print(f"id{i} trk_erode:", tracker.get_config("trk_erode", i))
         # Draw rectangles for each point
         for rect in points:
           x1, y1, x2, y2 = rect

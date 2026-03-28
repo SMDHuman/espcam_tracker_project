@@ -1,3 +1,6 @@
+#ifndef IO_HANDLER_H
+#define IO_HANDLER_H
+
 #include <Arduino.h>
 #include "esp_camera.h"
 
@@ -35,3 +38,5 @@ static camera_config_t camera_config = {
 
 void io_init();
 void io_task(void * pvParameters);
+
+#endif // IO_HANDLER_H

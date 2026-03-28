@@ -3,16 +3,19 @@
 #include "serial_handler.h"
 #include "io_handler.h"
 #include "espnet.h"
-// #include "tracker.h"
+#include "tracker.h"
 
 // ----------------------------------------------------------------------------
 void setup() {
+  // Initialize Serial
+  Serial.begin(115200);
+  // Initialize builtin led
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, !LOW);
   //... 
-  io_init();
   serial_init();
+  io_init();
   espnet_init();
-  // tracker_init();
-  // config_reload();
   //... 
   xTaskCreatePinnedToCore(espnet_task, "ESP-NET", 8192, NULL, 1, NULL, 0);
   xTaskCreatePinnedToCore(serial_task, "Serial", 8192, NULL, 1, NULL, 0);
