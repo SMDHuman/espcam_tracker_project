@@ -10,6 +10,9 @@ uint32_t camera_height;
 
 //-----------------------------------------------------------------------------
 void io_init(){
+  // Initialize builtin led
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, !LOW);
   // Initialize camera
   esp_err_t err = esp_camera_init(&camera_config);
   if(err != ESP_OK){

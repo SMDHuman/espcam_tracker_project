@@ -18,7 +18,7 @@ class Tracker_Interface(Protocol):
 
   def __init__(self, port: str, baudrate: int = 115200, timeout: int = 1):
     # import the enums from the header file
-    path = os.path.join(sys.path[0], "..", "include", "command_handler.h")
+    path = os.path.join(sys.path[0], "..",  "src", "command_handler.h")
     with open(path) as f:
       enums = enum_parser(f.read())
     self.__dict__.update(enums["CMD_PACKET_TYPE_E"])

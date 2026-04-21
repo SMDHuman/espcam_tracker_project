@@ -1,14 +1,12 @@
-# This script demonstrate the interface with esp cam tracker module
 import time
-# Modules
+import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
 from modules.tracker_interface import Tracker_Interface
 
 # --------------------------------------------------------------------------
 # Example usage with matplotlib
 # --------------------------------------------------------------------------
 if(__name__ == "__main__"):
-  import matplotlib.pyplot as plt
-  from matplotlib.patches import Rectangle
   # Example usage
   tracker = Tracker_Interface("/dev/ttyUSB0")
   print("Tracker interface initialized")
@@ -31,6 +29,7 @@ if(__name__ == "__main__"):
       print("peer count: ", peer_count)
       print("peer list: ", tracker.get_peer_list())
       print("total frame: ", tracker.get_frame_count())
+      fcount = tracker.get_frame_count()
       #...
       ax.clear()
       ax.set_xlim(0, 240)
@@ -40,10 +39,9 @@ if(__name__ == "__main__"):
       fcount = tracker.get_frame_count()
       now = time.time()
       current_fps = round((fcount-last_fcount)/(now-last_fcount_time))
-      #print("fps: ", current_fps)
+      print("fps: ", current_fps)
       ax.set_title(f'FPS: {current_fps}')
       last_fcount_time = now
-      last_fcount = fcount
       #...
       for i in range(peer_count+1):
         # print(f" |-----------------")
@@ -67,5 +65,6 @@ if(__name__ == "__main__"):
       #...
       plt.draw()
       plt.pause(0.1)
+      last_fcount = fcount
   except KeyboardInterrupt:
     plt.close(fig)
